@@ -1,4 +1,4 @@
-function imagesFetch(nameImage, page) {
+function imagesFetch(nameImage, page, imagesArray) {
   const KEY = 'key=19055497-436f2f9143aedeb9fa32eebb3';
   const GENERAL_LINK = 'https://pixabay.com/api/';
 
@@ -8,7 +8,9 @@ function imagesFetch(nameImage, page) {
     if (r.ok) {
       return r.json();
     }
-    return Promise.reject(new Error('Картинки с таким именем отсутсвуют'));
+    if (imagesArray.lengs === 0) {
+      return Promise.reject(new Error('Картинки с таким именем отсутствуют'));
+    }
   });
 }
 const api = {

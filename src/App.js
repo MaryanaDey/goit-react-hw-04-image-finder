@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import { useState, useEffect } from 'react';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
@@ -10,80 +10,61 @@ import Modal from './components/Modal/Modal';
 import Loader from './components/Loader/Loader';
 import './styles/styles.css';
 
-export default class Finder extends Component {
-  state = {
-    nameImage: '',
-    imagesArray: [],
-    loading: false,
-    selectedImage: null,
-    page: 1,
-    showModal: false,
-    error: null,
-  };
+export default function Finder() {
+  const [nameImage, setNameImage] = useState('');
+  const [imagesArray, setImagesArray] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [selectedImage, setSelectedImage] = useState(null);
+  const [page, setPage] = useState(1);
+  const [showModal, setShowModal] = useState(false);
+  const [error, setError] = useState(null);
 
-  componentDidUpdate(prevProps, prevState) {
-    if (prevState.nameImage !== this.state.nameImage) {
-      this.setState({
-        page: 1,
-        nameImage: this.state.nameImage,
-        imagesArray: [],
-      });
-      this.searchImagesFetch();
+  useEffect(() => {
+    if (nameImage === '') {
+      return;
     }
-  }
+    searchImagesFetch();
+  }, [nameImage]);
 
-  componentDidMount(selectedImage) {
-    console.log('mount');
-  }
+  const searchImagesFetch = () => {
+    setLoading(true);
 
-  componentWillUnmount() {
-    console.log('Unmount');
-  }
-
-  searchImagesFetch = () => {
-    const { page, nameImage } = this.state;
-
-    this.setState({ loading: true });
-
-    Api.imagesFetch(nameImage, page)
-      .then(imagesArrayFetch => this.checkNewFetchImagesArray(imagesArrayFetch.hits))
-      .catch(error => this.setState({ error }))
-      .finally(() =>
-        this.setState(prevState => ({
-          loading: false,
-          page: prevState.page + 1,
-        })),
+    Api.imagesFetch(nameImage, page, imagesArray)
+      .then(imagesArrayFetch => checkNewFetchImagesArray(imagesArrayFetch.hits))
+      .catch(error => setError(error))
+      .finally(
+        () => setLoading(false),
+        setPage(prevState => prevState + 1),
       );
   };
 
-  checkNewFetchImagesArray = imagesArrayFetch => {
+  const checkNewFetchImagesArray = imagesArrayFetch => {
     imagesArrayFetch === []
-      ? this.setState({
-          imagesArray: imagesArrayFetch,
-        })
-      : this.setState(prevState => ({
-          imagesArray: [...prevState.imagesArray, ...imagesArrayFetch],
-        }));
+      ? setImagesArray(imagesArrayFetch)
+      : setImagesArray(prevState => [...prevState, ...imagesArrayFetch]);
   };
 
-  togleModal = () => {
-    this.setState(({ showModal }) => ({
-      showModal: !showModal,
-    }));
+  const togleModal = () => {
+    setShowModal(!showModal);
   };
 
-  isHendleFormaSubmit = nameImage => {
-    this.setState({ nameImage });
+  const isHendleFormaSubmit = nameImage => {
+    reset();
+
+    setNameImage(nameImage);
   };
 
-  isCurrentImage = (currentImage, tags) => {
-    this.setState({
-      selectedImage: [currentImage, tags],
-      showModal: true,
-    });
+  const reset = () => {
+    setPage(1);
+    setImagesArray([]);
   };
 
-  scrolGallery = () => {
+  const isCurrentImage = (currentImage, tags) => {
+    setSelectedImage([currentImage, tags]);
+    setShowModal(true);
+  };
+
+  const scrolGallery = () => {
     setTimeout(() => {
       window.scrollTo({
         top: document.documentElement.scrollHeight,
@@ -92,35 +73,35 @@ export default class Finder extends Component {
     }, 1000);
   };
 
-  onClickLoadMore = () => {
-    this.searchImagesFetch();
-    this.scrolGallery();
+  const onClickLoadMore = () => {
+    searchImagesFetch();
+    scrolGallery();
   };
 
-  render() {
-    const { nameImage, imagesArray, showModal, selectedImage, loading } = this.state;
+  return (
+    <>
+      <ToastContainer autoClose={3000} />
+      <Searchbar onSubmit={isHendleFormaSubmit} />
 
-    return (
-      <>
-        <ToastContainer autoClose={3000} />
-        <Searchbar onSubmit={this.isHendleFormaSubmit} />
-        {imagesArray && <ImageGallery arrayImages={imagesArray} onSubmit={this.isCurrentImage} />}
+      {imagesArray && <ImageGallery arrayImages={imagesArray} onSubmit={isCurrentImage} />}
 
-        {showModal && (
-          <Modal onClose={this.togleModal}>
-            <img src={selectedImage[0]} alt={selectedImage[1]} />
-          </Modal>
-        )}
-        {loading && <Loader />}
+      {showModal && (
+        <Modal onClose={togleModal}>
+          <img src={selectedImage[0]} alt={selectedImage[1]} />
+        </Modal>
+      )}
 
-        {!nameImage && (
-          <div className="container-paragraphInfo">
-            <p className="paragraphInfo"> Пожалуйста введите имя в поле !</p>
-          </div>
-        )}
+      {loading && <Loader />}
 
-        {imagesArray.length !== 0 && <Button onClick={this.onClickLoadMore}>загрузить ещё</Button>}
-      </>
-    );
-  }
+      {nameImage.lengs === 0 && (
+        <div className="container-paragraphInfo">
+          <p className="paragraphInfo">
+            Данных картинок {`{nameImage}`} не найдено или вы не ввели имя картинок. !
+          </p>
+        </div>
+      )}
+
+      {imagesArray.length !== 0 && <Button onClick={onClickLoadMore}>загрузить ещё </Button>}
+    </>
+  );
 }
