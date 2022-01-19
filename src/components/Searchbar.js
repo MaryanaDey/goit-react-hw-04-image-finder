@@ -4,8 +4,6 @@ import { toast } from 'react-toastify';
 
 import '../styles/styles.css';
 
-// import FetchAPI from "./FetchAPI";
-
 export default function Searchbar({ onSubmit }) {
   const [nameImage, setNameImage] = useState('');
 
@@ -21,7 +19,7 @@ export default function Searchbar({ onSubmit }) {
 
       return;
     }
-    onSubmit(this.state.nameImage.trim());
+    onSubmit(nameImage.trim());
     setNameImage('');
   };
 

@@ -1,5 +1,5 @@
 import React from 'react';
-
+import PropTypes from 'prop-types';
 import '../styles/styles.css';
 import ImageGalleryItem from './ImageGalleryItem';
 
@@ -18,3 +18,7 @@ export default function ImageGallery({ arrayImages, onSubmit }) {
     </ul>
   );
 }
+ImageGallery.propTypes = {
+  arrayImages: PropTypes.array.isRequired,
+  onSubmit: PropTypes.func.isRequired,
+};

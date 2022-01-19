@@ -1,5 +1,5 @@
 import React from 'react';
-
+import PropTypes from 'prop-types';
 import '../styles/styles.css';
 
 export default function ImageGalleryItem({ webformatURL, tags, largeImageURL, onClick }) {
@@ -9,3 +9,11 @@ export default function ImageGalleryItem({ webformatURL, tags, largeImageURL, on
     </li>
   );
 }
+
+ImageGalleryItem.propTypes = {
+  webformatURL: PropTypes.string.isRequired,
+  tags: PropTypes.string.isRequired,
+  largeImageURL: PropTypes.string.isRequired,
+
+  onClick: PropTypes.func.isRequired,
+};
